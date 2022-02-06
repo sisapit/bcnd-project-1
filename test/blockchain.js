@@ -70,12 +70,13 @@ describe('Star submission', function () {
         blockchain = new Blockchain();
     })
 
-    it('eventually resolves with new star in blockchain', async () => {
+
+    it('eventually resolves with new star in blockchain', () => {
         expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
         expect(blockchain.getChainHeight()).resolves.toBe(1);
     })
 
-    it('of 3 stars eventually resolves with all new stars in blockchain', async () => {
+    it('of 3 stars eventually resolves with all new stars in blockchain', () => {
         expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
         expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
         expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
