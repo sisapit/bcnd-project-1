@@ -11,6 +11,11 @@
 
 const SHA256 = require('crypto-js/sha256');
 const hex2ascii = require('hex2ascii');
+const util = require('util');
+
+function calcHash(obj) {
+    return SHA256(JSON.stringify(obj));
+}
 
 class Block {
 
@@ -21,6 +26,11 @@ class Block {
         this.body = Buffer.from(JSON.stringify(data)).toString('hex');   // Will contain the transactions stored in the block, by default it will encode the data
         this.time = 0;                                              // Timestamp for the Block creation
         this.previousBlockHash = null;                              // Reference to the previous Block Hash
+    }
+
+    createHash() {
+        this.hash = null;
+        this.hash = calcHash(this);
     }
 
     /**
@@ -39,18 +49,19 @@ class Block {
         let self = this;
         return new Promise((resolve, reject) => {
             // Save in auxiliary variable the current block hash
-            let hash_as_is = self.hash
+            let hash_as_is = self.hash;
             // Recalculate the hash of the Block
-            self.hash = null
-            let hash_to_be = SHA256(JSON.stringify(self))
-            self.hash = hash_as_is
+            self.hash = null;
+            let hash_to_be = calcHash(self); 
+            self.hash = hash_as_is;
             // Comparing if the hashes changed
-            if (hash_to_be !== hash_as_is) {
+            // CAUTION: A hash is a Javascript object, comparison using == or === doesn't work here!
+            if (!util.isDeepStrictEqual(hash_to_be, hash_as_is)) {
                 // Returning the Block is not valid
-                reject(`Expected hash <${hash_to_be}>. Actual hash <${hash_as_is}>`)
+                reject(`Error: Expected hash <${hash_to_be}>. Actual hash <${hash_as_is}>`)
             } else {
                 // Returning the Block is valid
-                resolve()
+                resolve(true)
             }
         });
     }

@@ -1,51 +1,94 @@
-const assert = require('assert').strict;
 const hex2ascii = require('hex2ascii');
 const { Block } = require('../src/block.js');
 
+// https://jestjs.io/docs/expect
 
 describe('Block constructor', function () {
-    let block = new Block({ amount: 123, currency: 'EUR' });
-    it('should construct object', function () {
-        assert.ok(block !== null && block !== undefined);
+    let block;
+    const content = { amount: 333, currency: 'EUR' };
+    beforeEach(() => {
+        block = new Block(content);
     });
-    it('should construct block with height 0', function () {
-        assert.equal(block.height, 0);
+
+    it('constructs block', () => {
+        expect(block).not.toBeNull()
+        expect(block).toBeDefined()
     });
-    it('should construct block with non-empty body', function () {
-        assert.ok(block.body.length > 0);
+
+    it('constructs genesis block unless otherwise indicated', function () {
+        expect(block.height).toEqual(0)
     });
-    it('should construct block with body data given', function () {
-        assert.equal(hex2ascii(block.body), '{"amount":123,"currency":"EUR"}');
+
+    it('constructs genesis block containing content', function () {
+        expect(block.body.length).toBeGreaterThan(0)
+    });
+
+    it('constructs block containing a copy of content given', function () {
+        expect(JSON.parse(hex2ascii(block.body))).toStrictEqual(content)
+        expect(JSON.parse(hex2ascii(block.body))).not.toBe(content)
     });
 });
 
 describe('Block validator', function () {
-    let block = new Block({ amount: 123, currency: 'EUR' });
-    it('should recognize newly constructed block as being invalid',
-        (done) => {
-            block.validate()
-                .then(() => done('ERROR: Newly constructed block should not be valid!')) // NOT OK
-                .catch(() => done()) // OK - Rejection of promise expected!
-        });
+    let block;
+    beforeEach(() => {
+        block = new Block('Hello world!');
+        block.createHash();
+    });
+
+    it('recognizes that newly constructed block is valid', () => {
+        return expect(block.validate()).resolves.toBeTruthy();
+    });
+
+    it('recognizes that empty block is valid', () => {
+        block = new Block('');
+        block.createHash();
+        return expect(block.validate()).resolves.toBeTruthy();
+    });
+
+    it('recognizes that null block is valid', () => {
+        block = new Block(null);
+        block.createHash();
+        return expect(block.validate()).resolves.toBeTruthy();
+    });
+
+    it('recognizes that incorrectly hashed block is invalid', () => {
+        // Flip bits in lowest byte of hash value without updating block content.
+        block.hash.words[0] ^= 255
+        expect.assertions(1)
+        return expect(block.validate()).rejects.toBeTruthy();
+    });
+
+    it('recognizes that block with outdated hash is invalid', () => {
+        // Change block content without updating body hash.
+        block.body = ':-o'
+        // block.generateHash();
+        expect.assertions(1);
+        return expect(block.validate()).rejects.toBeTruthy();
+    });
 });
 
 describe('Block data', function () {
-    it('should reject getting genesis block data',
-        (done) => {
-            let genesis_block = new Block({ amount: 123, currency: 'EUR' });
-            genesis_block.getBData()
-                .then((d) => { console.error(d); done('ERROR') }) // NOT OK
-                .catch((e) => { console.log(e); done() }) // OK        
-        });
-    it('should return non genesis block data',
-        (done) => {
-            let block = new Block({ amount: 123, currency: 'EUR' });
-            block.height = 1;
-            block.getBData()
-                .then((d) => { console.log(d); done() }) // OK
-                .catch((e) => { console.error(e); done('ERROR') }) // NOT OK
-        });
+    let block;
+    const content = { amount: 123, currency: 'EUR' };
 
+    beforeEach(() => {
+        block = new Block(content);
+    });
+
+    it('connot be fetched for genesis block', () => {
+        return expect(block.getBData()).rejects.toBeTruthy();
+    });
+
+    it('can be fetched for regular block', () => {
+        block.height = 4444;
+        return expect(block.getBData()).resolves.toBeTruthy();
+    });
+
+    it('contains data passed to constructor', () => {
+        block.height = 4444;
+        return block.getBData().then(d => expect(d).toStrictEqual(content));
+    });
 });
 
 // https://javascript.tutorialink.com/mocha-test-false-assert-timeouts/
