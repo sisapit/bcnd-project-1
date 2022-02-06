@@ -34,8 +34,8 @@ class Blockchain {
      * Passing as a data `{data: 'Genesis Block'}`
      */
     async initializeChain() {
-        if( this.height === -1){
-            let block = new BlockClass.Block({data: 'Genesis Block'});
+        if (this.height === -1) {
+            let block = new BlockClass.Block({ data: 'Genesis Block' });
             await this._addBlock(block);
         }
     }
@@ -64,21 +64,43 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-           
+            try {
+                // Check for the height to assign the `previousBlockHash`.
+                if (self.height >= 0) {
+                    block.previousBlockHash = self.chain[self.height].hash;
+                }
+                // Assign the `timestamp` and the correct `height`.
+                block.time = new Date().getTime().toString().slice(0, -3);
+                block.height = self.height + 1;
+                // Create the `block hash` and push the block into the chain array.
+                block.createHash();
+                self.chain.push(block);
+                // Update the `this.height`
+                self.height++;
+                // Return a Promise that will resolve with the block added.
+                resolve();
+            } catch (e) {
+                // Return a Promise that will reject if an error happens during the execution.
+                reject();
+            }
         });
     }
 
     /**
      * The requestMessageOwnershipVerification(address) method
-     * will allow you  to request a message that you will use to
+     * will allow you to request a message that you will use to
      * sign it with your Bitcoin Wallet (Electrum or Bitcoin Core)
      * This is the first step before submit your Block.
-     * The method return a Promise that will resolve with the message to be signed
+     * The method returns a Promise that will resolve with the message to be signed.
      * @param {*} address 
      */
-    requestMessageOwnershipVerification(address) {
+    requestMessageOwnershipVerification(wallet_address) {
+        // The user will request the application to send a message to be signed using a Wallet and 
+        // in this way verify the ownership over the wallet address. 
         return new Promise((resolve) => {
-            
+            // The message format will be: `<WALLET_ADRESS>:${new Date().getTime().toString().slice(0,-3)}:starRegistry`;
+            let message = `${wallet_address}:${new Date().getTime().toString().slice(0, -3)}:starRegistry`;
+            resolve(message);
         });
     }
 
@@ -100,9 +122,21 @@ class Blockchain {
      * @param {*} star 
      */
     submitStar(address, message, signature, star) {
+        const FIVE_MIN = 5 * 60;
         let self = this;
         return new Promise(async (resolve, reject) => {
-            
+            try {
+                let time = parseInt(message.split(':')[1]);
+                let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
+                if (currentTime - time > FIVE_MIN) throw 'Message is outdated';
+                if (!bitcoinMessage.verify(message, address, signature, null, true)) throw 'Verification failed';
+                // Make sure the blockchain knows who owned each star.
+                let block = new BlockClass.Block({owner: address, star: star});
+                await this._addBlock(block);
+                resolve(block);
+            } catch (e) {
+                reject(`Error: ${e}`);
+            }
         });
     }
 
@@ -115,7 +149,7 @@ class Blockchain {
     getBlockByHash(hash) {
         let self = this;
         return new Promise((resolve, reject) => {
-           
+
         });
     }
 
@@ -128,7 +162,7 @@ class Blockchain {
         let self = this;
         return new Promise((resolve, reject) => {
             let block = self.chain.filter(p => p.height === height)[0];
-            if(block){
+            if (block) {
                 resolve(block);
             } else {
                 resolve(null);
@@ -142,11 +176,11 @@ class Blockchain {
      * Remember the star should be returned decoded.
      * @param {*} address 
      */
-    getStarsByWalletAddress (address) {
+    getStarsByWalletAddress(address) {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            
+
         });
     }
 
@@ -160,7 +194,7 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            
+
         });
     }
 
