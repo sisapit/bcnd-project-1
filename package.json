@@ -4,7 +4,11 @@
   "description": "This project creates a Blockchain application to store data into the blocks",
   "main": "app.js",
   "scripts": {
-    "test": "mocha test/*.js"
+    "test": "jest"
+  },
+  "jest": {
+    "verbose": true,
+    "testRegex": "(/test/.*)\\.js$"
   },
   "author": "Udacity - jose.morales@udacity.com",
   "license": "ISC",
@@ -15,8 +19,10 @@
     "crypto-js": "^3.1.9-1",
     "express": "^4.16.4",
     "hex2ascii": "0.0.3",
-    "mocha": "^9.2.0",
     "morgan": "^1.9.1"
   },
-  "repository": "https://github.com/sisapit/bcnd-project-1.git"
+  "repository": "https://github.com/sisapit/bcnd-project-1.git",
+  "devDependencies": {
+    "jest": "^27.4.7"
+  }
 }
