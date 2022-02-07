@@ -1,6 +1,8 @@
 const { Blockchain } = require('../src/blockchain.js');
 const { Block } = require('../src/block.js');
 const hex2ascii = require('hex2ascii');
+const CryptoJS = require('crypto-js');
+const util = require('util');
 
 // https://jestjs.io/docs/expect
 
@@ -70,16 +72,73 @@ describe('Star submission', function () {
         blockchain = new Blockchain();
     })
 
+    it('eventually resolves with new star in blockchain', async () => {
+        try {
+            let block = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            expect(block).toBeTruthy();
+            expect(block.height).toBe(1);
 
-    it('eventually resolves with new star in blockchain', () => {
-        expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
-        expect(blockchain.getChainHeight()).resolves.toBe(1);
+            expect(blockchain.getChainHeight()).resolves.toBe(1);
+        } catch (e) {
+            throw `Error: ${e}`
+        }
     })
 
-    it('of 3 stars eventually resolves with all new stars in blockchain', () => {
-        expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
-        expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
-        expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).resolves;
-        expect(blockchain.getChainHeight()).resolves.toBe(3);
+    it('of 3 stars eventually resolves with all 3 stars in blockchain', async () => {
+        try {
+            let block1 = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            expect(block1.height).toBe(1);
+
+            let block2 = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            expect(block2.height).toBe(2);
+            expect(block2.hash.toString(CryptoJS.enc.Hex)).not.toEqual(block1.hash.toString(CryptoJS.enc.Hex));
+
+            let block3 = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            expect(block3.height).toBe(3);
+            expect(block3.hash.toString(CryptoJS.enc.Hex)).not.toEqual(block1.hash.toString(CryptoJS.enc.Hex));
+            expect(block3.hash.toString(CryptoJS.enc.Hex)).not.toEqual(block2.hash.toString(CryptoJS.enc.Hex));
+
+            expect(blockchain.getChainHeight()).resolves.toBe(3);
+        } catch (e) {
+            throw `Error: ${e}`
+        }
     })
+
+    it('add stars that could be found by hash in blockchain', async () => {
+        try {
+            let hash;
+            for (let i = 0; i < 20; i++) {
+                let block = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+                if (i == 16) {
+                    // Make a copy of the hash to get an individual hash object instead of a reference to the block's hash within the blockchain.
+                    hash = CryptoJS.enc.Hex.parse(block.hash.toString());
+                }
+            }
+            let block = await blockchain.getBlockByHash(hash);
+            expect(block).toBeTruthy();
+            expect(block.hash.toString(CryptoJS.enc.Hex)).toEqual(hash.toString(CryptoJS.enc.Hex));
+        } catch (e) {
+            throw `Error: ${e}`
+        }
+    });
+
+    it('add stars that could be found by wallet address in blockchain', async () => {
+        try {
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            await blockchain.submitStar('1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj', '1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj:2011775400:starRegistry', 'IGAzhjctuyjmfS0JzVh8B8DGnlK75mx8otzkNLxP6cRDec08Z8mb+7fJDhQydgTaklc/TccyDdhBscoCqayxOKI=', STAR);
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            await blockchain.submitStar('1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj', '1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj:2011775400:starRegistry', 'IGAzhjctuyjmfS0JzVh8B8DGnlK75mx8otzkNLxP6cRDec08Z8mb+7fJDhQydgTaklc/TccyDdhBscoCqayxOKI=', STAR);
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+
+            let blocks = await blockchain.getStarsByWalletAddress(WALLET_ADRESS);
+            expect(blockchain.getChainHeight()).resolves.toBe(8);
+            expect(blocks).toBeTruthy();
+            expect(blocks.length).toBe(3);
+        } catch (e) {
+            throw `Error: ${e}`
+        }
+    });
 });

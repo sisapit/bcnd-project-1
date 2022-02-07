@@ -11,6 +11,8 @@
 const SHA256 = require('crypto-js/sha256');
 const BlockClass = require('./block.js');
 const bitcoinMessage = require('bitcoinjs-message');
+const util = require('util');
+const { resourceLimits } = require('worker_threads');
 
 class Blockchain {
 
@@ -149,7 +151,15 @@ class Blockchain {
     getBlockByHash(hash) {
         let self = this;
         return new Promise((resolve, reject) => {
-
+            // Caution: ==/=== comparison is not enough, because hashes could be equal, although being different objects!
+            // let found = self.chain.filter(b => b.hash == hash);
+            let found = self.chain.filter(b => util.isDeepStrictEqual(b.hash, hash));
+            if (found.length === 1)
+                resolve(found[0])
+            else if (found.length === 0)
+                reject('No block found!')
+            else
+                reject('More than one block found!')
         });
     }
 
@@ -180,7 +190,16 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-
+            self.chain.forEach(async b => {
+                try {
+                    let data = await b.getBData();
+                    if (data.hasOwnProperty('owner') && data.owner == address)
+                        stars.push(data);
+                } catch (e) {
+                    return false;
+                }
+            });
+            resolve(stars);
         });
     }
 
