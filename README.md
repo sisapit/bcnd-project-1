@@ -194,8 +194,26 @@ You should see in your terminal a message indicating that the server is listenin
 3. Make your first request of ownership sending your wallet address:
     ![Request: http://localhost:8000/requestValidation ](https://s3.amazonaws.com/video.udacity-data.com/topher/2019/April/5ca36182_request-ownership/request-ownership.png)
 4. Sign the message with your Wallet:
-    ![Use the Wallet to sign a message](https://s3.amazonaws.com/video.udacity-data.com/topher/2019/April/5ca36182_request-ownership/request-ownership.png)
+    ![Use the Wallet to sign a message](https://s3.amazonaws.com/video.udacity-data.com/topher/2019/April/5ca365d3_signing-message/signing-message.png)
 5. Submit your Star
      ![Request: http://localhost:8000/submitstar](https://s3.amazonaws.com/video.udacity-data.com/topher/2019/April/5ca365d3_signing-message/signing-message.png)
 6. Retrieve Stars owned by me
     ![Request: http://localhost:8000/blocks/<WALLET_ADDRESS>](https://s3.amazonaws.com/video.udacity-data.com/topher/2019/April/5ca362b9_retrieve-stars/retrieve-stars.png)
+
+## How to test your application using Curl?
+
+```
+curl http://localhost:8000/block/height/0
+
+curl -X POST http://localhost:8000/requestValidation -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf"}' 
+
+curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf", "message": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf:2011775400:starRegistry", "signature":"IGxEyUnyf3W3ZhmjlUYv4gbabKkiJzJirWs49ZtxJkb+I2FbLiw/e/bfxYtMzkUkoES795ZvJR8ortSGYrOv92s=", "star": {"dec":"68° 52'' 56.9", "ra":"16h 29m 1.0s", "story":"Twinkle, twinkle little star :-)"}}' 
+
+curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT", "message": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775999:starRegistry", "signature":"H156ODVMy50k/tFIisV9tYuuQwnDpdOapsqrblGZmfQIA7SHZYNGlX6h2jg1hC5XbnGoEyOkWYiD7u7+LYxQg00=", "star": {"dec":"57° 31'' 44.8", "ra":"17h 33m 1.8s", "story":"Fast moving star :-o"}}' 
+
+curl http://localhost:8000/blocks/12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf
+
+curl http://localhost:8000/blocks/16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT
+
+
+```
