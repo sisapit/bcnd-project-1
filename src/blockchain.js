@@ -67,11 +67,13 @@ class Blockchain {
         let self = this;
         return new Promise(async (resolve, reject) => {
             try {
+                // Execute the validateChain() function every time a block is added.
+                if(!self.validateChain()) throw("EChainInvalid, Chain is invalid");
                 // Check for the height to assign the `previousBlockHash`.
                 if (self.height >= 0) {
                     block.previousBlockHash = self.chain[self.height].hash;
                 } else {
-                    previousBlockHash = null;      
+                    block.previousBlockHash = null;      
                 }
                 // Assign the `timestamp` and the correct `height`.
                 block.time = new Date().getTime().toString().slice(0, -3);
@@ -132,8 +134,8 @@ class Blockchain {
             try {
                 let time = parseInt(message.split(':')[1]);
                 let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
-                if (currentTime - time > FIVE_MIN) throw 'Message is outdated';
-                if (!bitcoinMessage.verify(message, address, signature, null, true)) throw 'Verification failed';
+                if (currentTime - time > FIVE_MIN) throw 'EOutdated, Message is outdated';
+                if (!bitcoinMessage.verify(message, address, signature, null, true)) throw 'EVerification, Verification failed';
                 // Make sure the blockchain knows who owned each star.
                 let block = new BlockClass.Block({ owner: address, star: star });
                 await this._addBlock(block);
@@ -159,9 +161,9 @@ class Blockchain {
             if (found.length === 1)
                 resolve(found[0])
             else if (found.length === 0)
-                reject('No block found for hash!')
+                reject('No block found for hash')
             else
-                reject('More than one block found for hash!')
+                reject('More than one block found for hash')
         });
     }
 
@@ -219,10 +221,19 @@ class Blockchain {
             try {
                 let previousBlockHash = null;
                 self.chain.forEach(async b => {
+                    // Validate the block.
                     b.validate().then(r => {
                         if (!r)
-                            errorLog.push('Error: Block is invalid, ' + JSON.stringify(b).substring(0,30));
+                            errorLog.push(`Error: Block at height ${b.height} is invalid.`);
                     })
+                    // Check hash of block's predecessor within the blockchain.
+                    if(b.height > 0) {
+                        if(! b.previousBlockHash)
+                            errorLog.push(`Error: Previous hash for block at height ${b.height} is not set.`);
+                        else if(! util.isDeepStrictEqual(previousBlockHash, b.previousBlockHash))
+                            errorLog.push(`Error: Previous hash for block at height ${b.height} is wrong.`);
+                    }
+                    previousBlockHash = b.hash;
                 });
                 resolve(errorLog);
             } catch (e) {

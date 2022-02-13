@@ -34,28 +34,28 @@ Modify `requestMessageOwnershipVerification(address)` to allow you to request a 
 
 Modify `submitStar(address, message, signature, star)` function to register a new Block with the star object into the chain
 	
-- [ ] must resolve with the Block added or reject with an error.
-- [ ] time elapsed between when the message was sent and the current time must be less that 5 minutes
-- [ ] must verify the message with wallet address and signature: bitcoinMessage.verify(message, address, signature)
-- [ ] must create the block and add it to the chain if verification is valid
+- [x] must resolve with the Block added or reject with an error.
+- [x] time elapsed between when the message was sent and the current time must be less that 5 minutes
+- [x] must verify the message with wallet address and signature: bitcoinMessage.verify(message, address, signature)
+- [x] must create the block and add it to the chain if verification is valid
 
 Modify the `getBlockHeight(hash)` function to retrieve a Block based on the hash parameter
 
-- [ ] must return a Promise that will resolve with the Block
+- [x] must return a Promise that will resolve with the Block
 
 Modify the `getStarsByWalletAddress (address)` function to return an array of Stars from an owners collection
 
-- [ ] must return a Promise that will resolve with an array of the owner address' Stars from the chain
+- [x] must return a Promise that will resolve with an array of the owner address' Stars from the chain
 
 Modify the `validateChain()` function
 
-- [ ] must return a Promise that will resolve with the list of errors when validating the chain
-- [ ] must validate each block using validateBlock()
-- [ ] Each Block should check with the previousBlockHash
-- [ ] execute the validateChain() function every time a block is added
-- [ ] create an endpoint that will trigger the execution of validateChain()
+- [x] must return a Promise that will resolve with the list of errors when validating the chain
+- [x] must validate each block using validate()
+- [x] Each Block should check with the previousBlockHash
+- [x] execute the validateChain() function every time a block is added
+- [x] create an endpoint that will trigger the execution of validateChain()
 
-## Test your App functionality
+## Test your App functionality using Postman
 
 Use 'POSTMAN' or similar service to test your blockchains endpoints and send screenshots of each call
 
@@ -65,3 +65,24 @@ Use 'POSTMAN' or similar service to test your blockchains endpoints and send scr
 - [ ] must submit your Star
 - [ ] must use GET call to retrieve starts owned by a particular address
 
+## Test your App functionality on the command line
+
+```
+curl http://localhost:8000/validateBlockchain
+
+curl http://localhost:8000/block/height/0
+
+curl -X POST http://localhost:8000/requestValidation -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf"}' 
+
+curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf", "message": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf:2011775400:starRegistry", "signature":"IGxEyUnyf3W3ZhmjlUYv4gbabKkiJzJirWs49ZtxJkb+I2FbLiw/e/bfxYtMzkUkoES795ZvJR8ortSGYrOv92s=", "star": {"dec":"68° 52'' 56.9", "ra":"16h 29m 1.0s", "story":"Twinkle, twinkle little star :-)"}}' 
+
+curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT", "message": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775999:starRegistry", "signature":"H156ODVMy50k/tFIisV9tYuuQwnDpdOapsqrblGZmfQIA7SHZYNGlX6h2jg1hC5XbnGoEyOkWYiD7u7+LYxQg00=", "star": {"dec":"57° 31'' 44.8", "ra":"17h 33m 1.8s", "story":"Fast moving star :-o"}}' 
+
+curl http://localhost:8000/blocks/12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf
+
+curl http://localhost:8000/blocks/16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT
+
+curl http://localhost:8000/validateBlockchain
+
+
+```
