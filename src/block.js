@@ -57,10 +57,10 @@ class Block {
             // Comparing if the hashes changed
             // CAUTION: A hash is a Javascript object, comparison using == or === doesn't work here!
             if (!util.isDeepStrictEqual(hash_to_be, hash_as_is)) {
-                // Returning the Block is not valid
-                reject(`Error: Expected hash <${hash_to_be}>. Actual hash <${hash_as_is}>`)
+                // Returning the block is not valid.
+                resolve(false)
             } else {
-                // Returning the Block is valid
+                // Returning the block is valid.
                 resolve(true)
             }
         });
@@ -86,7 +86,7 @@ class Block {
             let data_obj = JSON.parse(data_json)
             // Resolve with the data if the object isn't the Genesis block
             if (self.height === 0)
-                reject('Genesis 1,1: In the beginning God created the heavens and the earth and the first block.')
+                reject('Genesis 1,1');
             else
                 resolve(data_obj);
         })

@@ -70,6 +70,8 @@ class Blockchain {
                 // Check for the height to assign the `previousBlockHash`.
                 if (self.height >= 0) {
                     block.previousBlockHash = self.chain[self.height].hash;
+                } else {
+                    previousBlockHash = null;      
                 }
                 // Assign the `timestamp` and the correct `height`.
                 block.time = new Date().getTime().toString().slice(0, -3);
@@ -80,10 +82,10 @@ class Blockchain {
                 // Update the `this.height`
                 self.height++;
                 // Return a Promise that will resolve with the block added.
-                resolve();
+                resolve(block);
             } catch (e) {
                 // Return a Promise that will reject if an error happens during the execution.
-                reject();
+                reject(`Error: Exception ${e}`);
             }
         });
     }
@@ -101,8 +103,8 @@ class Blockchain {
         // in this way verify the ownership over the wallet address. 
         return new Promise((resolve) => {
             // The message format will be: `<WALLET_ADRESS>:${new Date().getTime().toString().slice(0,-3)}:starRegistry`;
-            let message = `${wallet_address}:${new Date().getTime().toString().slice(0, -3)}:starRegistry`;
-            resolve(message);
+            let message_to_be_signed = `${wallet_address}:${new Date().getTime().toString().slice(0, -3)}:starRegistry`;
+            resolve(message_to_be_signed);
         });
     }
 
@@ -133,7 +135,7 @@ class Blockchain {
                 if (currentTime - time > FIVE_MIN) throw 'Message is outdated';
                 if (!bitcoinMessage.verify(message, address, signature, null, true)) throw 'Verification failed';
                 // Make sure the blockchain knows who owned each star.
-                let block = new BlockClass.Block({owner: address, star: star});
+                let block = new BlockClass.Block({ owner: address, star: star });
                 await this._addBlock(block);
                 resolve(block);
             } catch (e) {
@@ -157,9 +159,9 @@ class Blockchain {
             if (found.length === 1)
                 resolve(found[0])
             else if (found.length === 0)
-                reject('No block found!')
+                reject('No block found for hash!')
             else
-                reject('More than one block found!')
+                reject('More than one block found for hash!')
         });
     }
 
@@ -190,13 +192,14 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
+            // Caution: self.chain.filter(...) didn't work here, and I coulnd't figure out why. :-(
             self.chain.forEach(async b => {
                 try {
                     let data = await b.getBData();
                     if (data.hasOwnProperty('owner') && data.owner == address)
                         stars.push(data);
                 } catch (e) {
-                    return false;
+                    // Ignore exception.
                 }
             });
             resolve(stars);
@@ -213,7 +216,19 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-
+            try {
+                let previousBlockHash = null;
+                self.chain.forEach(async b => {
+                    b.validate().then(r => {
+                        if (!r)
+                            errorLog.push('Error: Block is invalid, ' + JSON.stringify(b).substring(0,30));
+                    })
+                });
+                resolve(errorLog);
+            } catch (e) {
+                errorLog.push('Error: Exception ${e}');
+                reject(errorLog);
+            }
         });
     }
 

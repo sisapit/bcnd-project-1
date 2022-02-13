@@ -56,7 +56,7 @@ describe('Block validator', function () {
         // Flip bits in lowest byte of hash value without updating block content.
         block.hash.words[0] ^= 255
         expect.assertions(1)
-        return expect(block.validate()).rejects.toBeTruthy();
+        return expect(block.validate()).resolves.toBeFalsy();
     });
 
     it('recognizes that block with outdated hash is invalid', () => {
@@ -64,7 +64,7 @@ describe('Block validator', function () {
         block.body = ':-o'
         // block.generateHash();
         expect.assertions(1);
-        return expect(block.validate()).rejects.toBeTruthy();
+        return expect(block.validate()).resolves.toBeFalsy();
     });
 });
 

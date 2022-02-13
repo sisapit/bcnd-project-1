@@ -133,12 +133,77 @@ describe('Star submission', function () {
             await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
             await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
 
-            let blocks = await blockchain.getStarsByWalletAddress(WALLET_ADRESS);
             expect(blockchain.getChainHeight()).resolves.toBe(8);
+
+            let blocks = await blockchain.getStarsByWalletAddress(WALLET_ADRESS);
             expect(blocks).toBeTruthy();
             expect(blocks.length).toBe(3);
         } catch (e) {
             throw `Error: ${e}`
         }
     });
+    
 });
+
+describe('Blockchain validation', function () {
+    const WALLET_ADRESS = '12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf';
+    // Time travel - fake a message with timestamp "Sat Oct 01 2033 12:30:00 GMT+0200" coming from future.
+    const MESSAGE = '12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf:2011775400:starRegistry';
+    // Signing MESSAGE with WALLET_ADDRESS resolves the following signature:
+    let SIGNATURE = 'IGxEyUnyf3W3ZhmjlUYv4gbabKkiJzJirWs49ZtxJkb+I2FbLiw/e/bfxYtMzkUkoES795ZvJR8ortSGYrOv92s=';
+    const STAR = {
+        dec: "68° 52' 56.9",
+        ra: "16h 29m 1.0s",
+        story: "Hello star! :-)"
+    };
+    let blockchain;
+
+    beforeEach(() => {
+        blockchain = new Blockchain();
+    })
+
+    it('validates blockchain filled with valid stars', async () => {
+        try {
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            await blockchain.submitStar('1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj', '1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj:2011775400:starRegistry', 'IGAzhjctuyjmfS0JzVh8B8DGnlK75mx8otzkNLxP6cRDec08Z8mb+7fJDhQydgTaklc/TccyDdhBscoCqayxOKI=', STAR);
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            let b = await blockchain.submitStar('1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj', '1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj:2011775400:starRegistry', 'IGAzhjctuyjmfS0JzVh8B8DGnlK75mx8otzkNLxP6cRDec08Z8mb+7fJDhQydgTaklc/TccyDdhBscoCqayxOKI=', STAR);
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+
+            let errors = await blockchain.validateChain();
+            expect(errors).toHaveLength(0);
+        } catch (e) {
+            throw `Error: ${e}`
+        }
+    });
+
+    it('validates blockchain filled with valid stars', async () => {
+        try {
+            let block;
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            await blockchain.submitStar('1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj', '1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj:2011775400:starRegistry', 'IGAzhjctuyjmfS0JzVh8B8DGnlK75mx8otzkNLxP6cRDec08Z8mb+7fJDhQydgTaklc/TccyDdhBscoCqayxOKI=', STAR);
+            // Tamper block's hash value.
+            block.hash.words[0] ^= 255;
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            b = await blockchain.submitStar('1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj', '1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj:2011775400:starRegistry', 'IGAzhjctuyjmfS0JzVh8B8DGnlK75mx8otzkNLxP6cRDec08Z8mb+7fJDhQydgTaklc/TccyDdhBscoCqayxOKI=', STAR);
+            // Tamper block's height.
+            b.height = 12345;
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar('16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT', '16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775400:starRegistry', 'HxenXJxOmf42dGaq4scDkQMq24xcM4FjVtYsDXGB+inoD9H3/m4DoCogmSp9f0l863LmH4zBysDx7fNy3jEfvI8=', STAR);
+            await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
+            // Tamper block's previous hash value.
+            block.hash.words[0] ^= 255;
+
+            let errors = await blockchain.validateChain();
+            expect(errors).toHaveLength(0);
+        } catch (e) {
+            throw `Error: ${e}`
+        }
+    });
+
+    
+});    
