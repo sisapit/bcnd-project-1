@@ -11,7 +11,7 @@
     "verbose": true,
     "testRegex": "(/test/.*)\\.js$"
   },
-  "author": "Udacity - jose.morales@udacity.com",
+  "author": "Sebastian Scheffler",
   "license": "ISC",
   "dependencies": {
     "bitcoinjs-lib": "^4.0.3",

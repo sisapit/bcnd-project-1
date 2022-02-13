@@ -1,4 +1,4 @@
-**Blockchain Developer Nanogree**  
+**Blockchain Developer Nanodegree**  
 Project 1 Specification
 
 # Create Your Own Private Blockchain
