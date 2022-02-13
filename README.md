@@ -1,6 +1,45 @@
-Project Specification
+**Blockchain Developer Nanogree**  
+Project 1 Specification
 
 # Create Your Own Private Blockchain
+
+## Test your App functionality (Postman)
+
+Use 'POSTMAN' or similar service to test your blockchains endpoints and send screenshots of each call.
+
+- [x] must use a GET call to request the Genesis block ![Postman](images/test-1.png)
+- [x] must use a POST call to requestValidation ![Postman](images/test-2.png)
+- [x] must sign message with your wallet ![Electrum](images/test-3.png)
+- [x] must submit your Star ![Postman](images/test-4.png)
+- [x] must use GET call to retrieve stars owned by a particular address  
+![Postman](images/test-5.png)  
+![Postman](images/test-6.png)
+
+## Test your App functionality (Unit Tests)
+
+![Server log](images/unit-tests.png)
+
+## Test your App functionality (Command Line)
+
+![Server log](images/server-log.png)
+
+```
+curl http://localhost:8000/validateBlockchain
+
+curl http://localhost:8000/block/height/0
+
+curl -X POST http://localhost:8000/requestValidation -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf"}' 
+
+curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf", "message": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf:2011775400:starRegistry", "signature":"IGxEyUnyf3W3ZhmjlUYv4gbabKkiJzJirWs49ZtxJkb+I2FbLiw/e/bfxYtMzkUkoES795ZvJR8ortSGYrOv92s=", "star": {"dec":"68° 52'' 56.9", "ra":"16h 29m 1.0s", "story":"Twinkle, twinkle little star :-)"}}' 
+
+curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT", "message": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775999:starRegistry", "signature":"H156ODVMy50k/tFIisV9tYuuQwnDpdOapsqrblGZmfQIA7SHZYNGlX6h2jg1hC5XbnGoEyOkWYiD7u7+LYxQg00=", "star": {"dec":"57° 31'' 44.8", "ra":"17h 33m 1.8s", "story":"Fast moving star :-o"}}' 
+
+curl http://localhost:8000/blocks/12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf
+
+curl http://localhost:8000/blocks/16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT
+
+curl http://localhost:8000/validateBlockchain
+```
 
 ## Complete unfinished block.js implementation
 
@@ -55,34 +94,3 @@ Modify the `validateChain()` function
 - [x] execute the validateChain() function every time a block is added
 - [x] create an endpoint that will trigger the execution of validateChain()
 
-## Test your App functionality using Postman
-
-Use 'POSTMAN' or similar service to test your blockchains endpoints and send screenshots of each call
-
-- [ ] must use a GET call to request the Genesis block
-- [ ] must use a POST call to requestValidation
-- [ ] must sign message with your wallet
-- [ ] must submit your Star
-- [ ] must use GET call to retrieve starts owned by a particular address
-
-## Test your App functionality on the command line
-
-```
-curl http://localhost:8000/validateBlockchain
-
-curl http://localhost:8000/block/height/0
-
-curl -X POST http://localhost:8000/requestValidation -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf"}' 
-
-curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf", "message": "12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf:2011775400:starRegistry", "signature":"IGxEyUnyf3W3ZhmjlUYv4gbabKkiJzJirWs49ZtxJkb+I2FbLiw/e/bfxYtMzkUkoES795ZvJR8ortSGYrOv92s=", "star": {"dec":"68° 52'' 56.9", "ra":"16h 29m 1.0s", "story":"Twinkle, twinkle little star :-)"}}' 
-
-curl -X POST http://localhost:8000/submitstar -H "Content-Type: application/json" -d '{"address": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT", "message": "16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT:2011775999:starRegistry", "signature":"H156ODVMy50k/tFIisV9tYuuQwnDpdOapsqrblGZmfQIA7SHZYNGlX6h2jg1hC5XbnGoEyOkWYiD7u7+LYxQg00=", "star": {"dec":"57° 31'' 44.8", "ra":"17h 33m 1.8s", "story":"Fast moving star :-o"}}' 
-
-curl http://localhost:8000/blocks/12ckHYRzrP1tdv4jf9mL1mPv5H3E8RFKDf
-
-curl http://localhost:8000/blocks/16thM3ZKUekL9VSXDXhxmoiaK2UoJeKTuT
-
-curl http://localhost:8000/validateBlockchain
-
-
-```
