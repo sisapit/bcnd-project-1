@@ -1,7 +1,6 @@
 const { Blockchain } = require('../src/blockchain.js');
 const { Block } = require('../src/block.js');
 const hex2ascii = require('hex2ascii');
-const CryptoJS = require('crypto-js');
 const util = require('util');
 
 // https://jestjs.io/docs/expect
@@ -91,12 +90,12 @@ describe('Star submission', function () {
 
             let block2 = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
             expect(block2.height).toBe(2);
-            expect(block2.hash.toString(CryptoJS.enc.Hex)).not.toEqual(block1.hash.toString(CryptoJS.enc.Hex));
+            expect(block2.hash).not.toEqual(block1.hash);
 
             let block3 = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
             expect(block3.height).toBe(3);
-            expect(block3.hash.toString(CryptoJS.enc.Hex)).not.toEqual(block1.hash.toString(CryptoJS.enc.Hex));
-            expect(block3.hash.toString(CryptoJS.enc.Hex)).not.toEqual(block2.hash.toString(CryptoJS.enc.Hex));
+            expect(block3.hash).not.toEqual(block1.hash);
+            expect(block3.hash).not.toEqual(block2.hash);
 
             expect(blockchain.getChainHeight()).resolves.toBe(3);
         } catch (e) {
@@ -120,9 +119,9 @@ describe('Star submission', function () {
                 let block = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
                 if (i == 5) hash = block.hash;
             }
-            let block = await blockchain.getBlockByHash(hash);
-            expect(block).toBeTruthy();
-            expect(block.hash.toString(CryptoJS.enc.Hex)).toEqual(hash.toString(CryptoJS.enc.Hex));
+            let found = await blockchain.getBlockByHash(hash);
+            expect(found).toBeTruthy();
+            expect(found.hash).toEqual(hash);
         } catch (e) {
             throw `Error: ${e}`
         }
