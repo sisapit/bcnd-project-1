@@ -113,15 +113,12 @@ describe('Star submission', function () {
         return expect(blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR)).rejects.toBeTruthy();
     });
 
-    it('add stars that could be found by hash in blockchain', async () => {
+    it('adds stars that could be found by hash in blockchain', async () => {
         try {
             let hash;
             for (let i = 0; i < 10; i++) {
                 let block = await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
-                if (i == 5) {
-                    // Make a copy of the hash to get an individual hash object instead of a reference to the block's hash within the blockchain.
-                    hash = CryptoJS.enc.Hex.parse(block.hash.toString());
-                }
+                if (i == 5) hash = block.hash;
             }
             let block = await blockchain.getBlockByHash(hash);
             expect(block).toBeTruthy();
@@ -131,7 +128,7 @@ describe('Star submission', function () {
         }
     });
 
-    it('add stars that could be found by wallet address in blockchain', async () => {
+    it('adds stars that could be found by wallet address in blockchain', async () => {
         try {
             await blockchain.submitStar(WALLET_ADRESS, MESSAGE, SIGNATURE, STAR);
             await blockchain.submitStar('1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj', '1KhG78MQHtPxP2c7wPC8AFCor72BziaSSj:2011775400:starRegistry', 'IGAzhjctuyjmfS0JzVh8B8DGnlK75mx8otzkNLxP6cRDec08Z8mb+7fJDhQydgTaklc/TccyDdhBscoCqayxOKI=', STAR);
@@ -207,9 +204,8 @@ describe('Blockchain validation', function () {
 
             // Tamper block @ height 2 -> 1 error
             tampered = await blockchain.getBlockByHeight(2);
-            tampered.hash = CryptoJS.enc.Hex.parse(tampered.hash.toString());
-            // Invalidates previous hash of block @ height 3 -> 1 error
-            tampered.hash.words[0] ^= 255;
+            // Caution: This invalidates previous hash of block @ height 3 as well! -> 1 error
+            tampered.hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
             // Tamper block @ height 5 -> 1 error
             tampered = await blockchain.getBlockByHeight(5);

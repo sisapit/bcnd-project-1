@@ -13,8 +13,13 @@ const SHA256 = require('crypto-js/sha256');
 const hex2ascii = require('hex2ascii');
 const util = require('util');
 
+/**
+ * 
+ * @param {*} obj 
+ * @returns SHA256 hash for the object given as a string.
+ */
 function calcHash(obj) {
-    return SHA256(JSON.stringify(obj));
+    return SHA256(JSON.stringify(obj)).toString();
 }
 
 class Block {
@@ -56,7 +61,7 @@ class Block {
             self.hash = hash_as_is;
             // Comparing if the hashes changed
             // CAUTION: A hash is a Javascript object, comparison using == or === doesn't work here!
-            if (!util.isDeepStrictEqual(hash_to_be, hash_as_is)) {
+            if (hash_to_be != hash_as_is) {
                 // Returning the block is not valid.
                 resolve(false)
             } else {

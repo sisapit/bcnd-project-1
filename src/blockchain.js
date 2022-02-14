@@ -205,7 +205,7 @@ class Blockchain {
                 try {
                     let data = await b.getBData();
                     if (data.hasOwnProperty('owner') && data.owner == address)
-                        stars.push(data);
+                        stars.push(data); 
                 } catch (e) {
                     // Ignore exception.
                 }
@@ -228,10 +228,7 @@ class Blockchain {
                 let previousBlockHash = null;
                 self.chain.forEach(async b => {
                     // Validate the block.
-                    b.validate().then(r => {
-                        if (!r)
-                            errorLog.push(`Error: Block at height ${b.height} is invalid.`);
-                    })
+                    b.validate().then(e => e || errorLog.push(`Error: Block at height ${b.height} is invalid.`))
                     // Check hash of block's predecessor within the blockchain.
                     if (b.height > 0) {
                         if (!b.previousBlockHash)

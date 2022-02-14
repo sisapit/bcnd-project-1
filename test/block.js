@@ -53,8 +53,8 @@ describe('Block validator', function () {
     });
 
     it('recognizes that incorrectly hashed block is invalid', () => {
-        // Flip bits in lowest byte of hash value without updating block content.
-        block.hash.words[0] ^= 255
+        // Set hash to SHA256 hash of string "".
+        block.hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
         expect.assertions(1)
         return expect(block.validate()).resolves.toBeFalsy();
     });
