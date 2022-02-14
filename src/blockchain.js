@@ -68,12 +68,18 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             try {
                 // Execute the validateChain() function every time a block is added.
-                if(!self.validateChain()) throw("EChainInvalid, Chain is invalid");
+                // if(!self.validateChain()) throw("EChainInvalid, Chain is invalid");
+                // CAUTION: The result of self.validateChain() is a promise and it is always truthy. So !self.validateChain() always 
+                // provides false, even in case of an invalid blockchain!
+                // if (! await self.validateChain().length) throw ("EChainInvalid, Validation of blockchain provided errors");
+                let errors = await self.validateChain();
+                if (errors.length > 0)
+                    throw ("EChainInvalid, Validation of blockchain provided errors");
                 // Check for the height to assign the `previousBlockHash`.
                 if (self.height >= 0) {
                     block.previousBlockHash = self.chain[self.height].hash;
                 } else {
-                    block.previousBlockHash = null;      
+                    block.previousBlockHash = null;
                 }
                 // Assign the `timestamp` and the correct `height`.
                 block.time = new Date().getTime().toString().slice(0, -3);
@@ -87,7 +93,7 @@ class Blockchain {
                 resolve(block);
             } catch (e) {
                 // Return a Promise that will reject if an error happens during the execution.
-                reject(`Error: Exception ${e}`);
+                reject(e);
             }
         });
     }
@@ -138,10 +144,10 @@ class Blockchain {
                 if (!bitcoinMessage.verify(message, address, signature, null, true)) throw 'EVerification, Verification failed';
                 // Make sure the blockchain knows who owned each star.
                 let block = new BlockClass.Block({ owner: address, star: star });
-                await this._addBlock(block);
+                await self._addBlock(block);
                 resolve(block);
             } catch (e) {
-                reject(`Error: ${e}`);
+                reject(e);
             }
         });
     }
@@ -227,17 +233,17 @@ class Blockchain {
                             errorLog.push(`Error: Block at height ${b.height} is invalid.`);
                     })
                     // Check hash of block's predecessor within the blockchain.
-                    if(b.height > 0) {
-                        if(! b.previousBlockHash)
+                    if (b.height > 0) {
+                        if (!b.previousBlockHash)
                             errorLog.push(`Error: Previous hash for block at height ${b.height} is not set.`);
-                        else if(! util.isDeepStrictEqual(previousBlockHash, b.previousBlockHash))
+                        else if (!util.isDeepStrictEqual(previousBlockHash, b.previousBlockHash))
                             errorLog.push(`Error: Previous hash for block at height ${b.height} is wrong.`);
                     }
                     previousBlockHash = b.hash;
                 });
                 resolve(errorLog);
             } catch (e) {
-                errorLog.push('Error: Exception ${e}');
+                errorLog.push(e);
                 reject(errorLog);
             }
         });
